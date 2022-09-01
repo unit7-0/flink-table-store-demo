@@ -10,7 +10,12 @@ services:
       - POSTGRES_DB=clients
 
   jobmanager:
-    image: flink:1.15.2-scala_2.12
+    image: flink:1.15.1-scala_2.12
+    volumes:
+      - ./libs/flink-table-store-dist-0.2.0.jar:/opt/flink/lib/flink-table-store-dist-0.2.0.jar
+      - ./libs/postgresql-42.5.0.jar:/opt/flink/lib/postgresql-42.5.0.jar
+      - ./libs/flink-connector-jdbc-1.15.2.jar:/opt/flink/lib/flink-connector-jdbc-1.15.2.jar
+      - ./libs/flink-shaded-hadoop-2-uber-2.8.3-10.0.jar:/opt/flink/lib/flink-shaded-hadoop-2-uber-2.8.3-10.0.jar
     expose:
       - "6123"
     ports:
@@ -20,7 +25,7 @@ services:
       - JOB_MANAGER_RPC_ADDRESS=jobmanager
 
   taskmanager:
-    image: flink:1.15.2-scala_2.12
+    image: flink:1.15.1-scala_2.12
     expose:
       - "6121"
       - "6122"
