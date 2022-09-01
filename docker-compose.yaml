@@ -10,12 +10,13 @@ services:
       - POSTGRES_DB=clients
 
   jobmanager:
-    image: flink:1.15.1-scala_2.12
+    image: apache/flink:1.15.2-scala_2.12
     volumes:
       - ./libs/flink-table-store-dist-0.2.0.jar:/opt/flink/lib/flink-table-store-dist-0.2.0.jar
       - ./libs/postgresql-42.5.0.jar:/opt/flink/lib/postgresql-42.5.0.jar
       - ./libs/flink-connector-jdbc-1.15.2.jar:/opt/flink/lib/flink-connector-jdbc-1.15.2.jar
       - ./libs/flink-shaded-hadoop-2-uber-2.8.3-10.0.jar:/opt/flink/lib/flink-shaded-hadoop-2-uber-2.8.3-10.0.jar
+      - ./storage:/tmp/table_store
     expose:
       - "6123"
     ports:
@@ -25,7 +26,13 @@ services:
       - JOB_MANAGER_RPC_ADDRESS=jobmanager
 
   taskmanager:
-    image: flink:1.15.1-scala_2.12
+    image: apache/flink:1.15.2-scala_2.12
+    volumes:
+      - ./libs/flink-table-store-dist-0.2.0.jar:/opt/flink/lib/flink-table-store-dist-0.2.0.jar
+      - ./libs/postgresql-42.5.0.jar:/opt/flink/lib/postgresql-42.5.0.jar
+      - ./libs/flink-connector-jdbc-1.15.2.jar:/opt/flink/lib/flink-connector-jdbc-1.15.2.jar
+      - ./libs/flink-shaded-hadoop-2-uber-2.8.3-10.0.jar:/opt/flink/lib/flink-shaded-hadoop-2-uber-2.8.3-10.0.jar
+      - ./storage:/tmp/table_store
     expose:
       - "6121"
       - "6122"
@@ -40,6 +47,17 @@ services:
         FLINK_PROPERTIES=
         taskmanager.numberOfTaskSlots: 8
         parallelism.default: 1
+  kafka-ui:
+    image: provectuslabs/kafka-ui
+    ports:
+      - "8080:8080"
+    depends_on:
+      - zookeeper
+      - kafka 
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092
+      KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
   kafka:
     image: confluentinc/cp-kafka:6.1.0
     environment:
@@ -49,6 +67,8 @@ services:
       KAFKA_LISTENERS: INSIDE://:29092,OUTSIDE://:9092
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
     ports:
       - "29092:29092"
       - "9092:9092"
