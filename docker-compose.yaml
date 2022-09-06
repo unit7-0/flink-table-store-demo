@@ -1,14 +1,13 @@
 version: "3.7"
 services:
   postgres:
-    image: postgres
+    image: debezium/postgres
     ports:
       - "5432:5432"
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=clients
-
   jobmanager:
     image: apache/flink:1.15.2-scala_2.12
     volumes:
@@ -16,6 +15,8 @@ services:
       - ./libs/postgresql-42.5.0.jar:/opt/flink/lib/postgresql-42.5.0.jar
       - ./libs/flink-connector-jdbc-1.15.2.jar:/opt/flink/lib/flink-connector-jdbc-1.15.2.jar
       - ./libs/flink-shaded-hadoop-2-uber-2.8.3-10.0.jar:/opt/flink/lib/flink-shaded-hadoop-2-uber-2.8.3-10.0.jar
+      - ./libs/nf-flink-functions_2.12-0.1.0-SNAPSHOT.jar:/opt/flink/lib/nf-flink-functions_2.12-0.1.0-SNAPSHOT.jar
+      - ./libs/flink-sql-connector-postgres-cdc-2.2.1.jar:/opt/flink/lib/flink-sql-connector-postgres-cdc-2.2.1.jar
       - ./storage:/tmp/table_store
     expose:
       - "6123"
@@ -32,6 +33,8 @@ services:
       - ./libs/postgresql-42.5.0.jar:/opt/flink/lib/postgresql-42.5.0.jar
       - ./libs/flink-connector-jdbc-1.15.2.jar:/opt/flink/lib/flink-connector-jdbc-1.15.2.jar
       - ./libs/flink-shaded-hadoop-2-uber-2.8.3-10.0.jar:/opt/flink/lib/flink-shaded-hadoop-2-uber-2.8.3-10.0.jar
+      - ./libs/nf-flink-functions_2.12-0.1.0-SNAPSHOT.jar:/opt/flink/lib/nf-flink-functions_2.12-0.1.0-SNAPSHOT.jar
+      - ./libs/flink-sql-connector-postgres-cdc-2.2.1.jar:/opt/flink/lib/flink-sql-connector-postgres-cdc-2.2.1.jar
       - ./storage:/tmp/table_store
     expose:
       - "6121"
